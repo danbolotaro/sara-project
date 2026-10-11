@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="assets/js/animacoes.js" defer></script>
 </head>
 <body>
   <header class="topo">
@@ -42,14 +44,14 @@
 
     <section class="secao" id="sobre">
       <div class="container container-estreito">
-        <h2>Sobre o projeto</h2>
-        <p>
+        <h2 class="revelar">Sobre o projeto</h2>
+        <p class="revelar">
           Quem acompanha pessoas em situação de vulnerabilidade costuma guardar
           as informações em cadernos, mensagens e na memória. Com o tempo, o
           histórico se perde: o que a pessoa contou, o que ela pediu, quando foi
           a última visita e com quem da família é possível falar.
         </p>
-        <p>
+        <p class="revelar">
           O SARA reúne isso em um sistema simples, pensado para o celular. Cada
           pessoa tem um cadastro com sua história e seus contatos, e cada
           encontro fica registrado com data, local, pedido de oração e
@@ -61,9 +63,9 @@
 
     <section class="secao secao-alternada" id="funcionalidades">
       <div class="container">
-        <h2>Funcionalidades</h2>
-        <div class="cartoes">
-          <article class="cartao">
+        <h2 class="revelar">Funcionalidades</h2>
+        <div class="cartoes cascata">
+          <article class="cartao revelar">
             <h3>Pessoas</h3>
             <p>
               Cadastro com nome, gênero, idade, cidade de origem, história e
@@ -71,7 +73,7 @@
               em destaque e o histórico completo.
             </p>
           </article>
-          <article class="cartao">
+          <article class="cartao revelar">
             <h3>Encontros</h3>
             <p>
               Registro de cada visita com data, local, pedido de oração,
@@ -79,7 +81,7 @@
               mais antigo e ficam ligados à pessoa.
             </p>
           </article>
-          <article class="cartao">
+          <article class="cartao revelar">
             <h3>Acesso protegido</h3>
             <p>
               O sistema guarda informações sensíveis, por isso só abre com a
@@ -93,23 +95,31 @@
 
     <section class="secao" id="telas">
       <div class="container">
-        <h2>Telas</h2>
-        <p class="secao-intro">Os dados exibidos nas imagens são fictícios.</p>
-        <div class="telas">
-          <figure class="tela">
-            <img src="assets/img/telas/login.png" alt="Tela de entrada do SARA com o campo de senha" width="390" height="720" loading="lazy">
+        <h2 class="revelar">Telas</h2>
+        <p class="secao-intro revelar">Os dados exibidos nas imagens são fictícios.</p>
+        <div class="telas cascata">
+          <figure class="tela revelar">
+            <div class="moldura">
+              <img src="assets/img/telas/login.png" alt="Tela de entrada do SARA com o campo de senha" width="390" height="720" loading="lazy">
+            </div>
             <figcaption>Entrada com a senha da equipe</figcaption>
           </figure>
-          <figure class="tela">
-            <img src="assets/img/telas/pessoa.png" alt="Perfil de uma pessoa com o último encontro em destaque e a lista de encontros" width="390" height="720" loading="lazy">
+          <figure class="tela revelar">
+            <div class="moldura">
+              <img src="assets/img/telas/pessoa.png" alt="Perfil de uma pessoa com o último encontro em destaque e a lista de encontros" width="390" height="720" loading="lazy">
+            </div>
             <figcaption>Perfil da pessoa e seus encontros</figcaption>
           </figure>
-          <figure class="tela">
-            <img src="assets/img/telas/encontro.png" alt="Detalhes de um encontro com data, local, pedido de oração, informações e contatos" width="390" height="720" loading="lazy">
+          <figure class="tela revelar">
+            <div class="moldura">
+              <img src="assets/img/telas/encontro.png" alt="Detalhes de um encontro com data, local, pedido de oração, informações e contatos" width="390" height="720" loading="lazy">
+            </div>
             <figcaption>Detalhes de um encontro</figcaption>
           </figure>
-          <figure class="tela">
-            <img src="assets/img/telas/formulario.png" alt="Formulário de cadastro de pessoa" width="390" height="720" loading="lazy">
+          <figure class="tela revelar">
+            <div class="moldura">
+              <img src="assets/img/telas/formulario.png" alt="Formulário de cadastro de pessoa" width="390" height="720" loading="lazy">
+            </div>
             <figcaption>Cadastro de pessoa</figcaption>
           </figure>
         </div>
@@ -118,21 +128,21 @@
 
     <section class="secao secao-alternada" id="tecnologias">
       <div class="container container-estreito">
-        <h2>Tecnologias</h2>
-        <dl class="tecnologias">
-          <div>
+        <h2 class="revelar">Tecnologias</h2>
+        <dl class="tecnologias cascata">
+          <div class="revelar">
             <dt>Front-end e API</dt>
             <dd>Next.js 16 (App Router), React 19 e TypeScript</dd>
           </div>
-          <div>
+          <div class="revelar">
             <dt>Banco de dados</dt>
             <dd>Supabase (PostgreSQL)</dd>
           </div>
-          <div>
+          <div class="revelar">
             <dt>Notificações na tela</dt>
             <dd>react-hot-toast</dd>
           </div>
-          <div>
+          <div class="revelar">
             <dt>Testes</dt>
             <dd>Playwright (end-to-end)</dd>
           </div>
@@ -142,21 +152,21 @@
 
     <section class="secao" id="links">
       <div class="container container-estreito">
-        <h2>Saiba mais</h2>
-        <ul class="links">
-          <li>
+        <h2 class="revelar">Saiba mais</h2>
+        <ul class="links cascata">
+          <li class="revelar">
             <a href="https://github.com/danbolotaro/sara-project">Repositório no GitHub</a>
             <span>Código-fonte completo.</span>
           </li>
-          <li>
+          <li class="revelar">
             <a href="https://github.com/danbolotaro/sara-project#como-executar">Como executar</a>
             <span>Passo a passo para rodar o projeto localmente.</span>
           </li>
-          <li>
+          <li class="revelar">
             <a href="https://github.com/danbolotaro/sara-project/blob/master/docs/sistema.md">Documentação do sistema</a>
             <span>Telas, API, autenticação e tabelas.</span>
           </li>
-          <li>
+          <li class="revelar">
             <a href="https://github.com/danbolotaro/sara-project/blob/master/docs/diagramas.md">Diagramas</a>
             <span>Caso de uso, DER e classes.</span>
           </li>
