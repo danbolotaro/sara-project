@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SARA · Sistema de Apoio e Registro de Acolhimento</title>
+  <meta name="description" content="Aplicação web para registrar pessoas acolhidas e os encontros feitos com cada uma delas.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="container topo-inner">
+      <a class="marca" href="#inicio">SARA</a>
+      <nav class="menu" aria-label="Seções">
+        <a href="#sobre">Sobre</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#telas">Telas</a>
+        <a href="#tecnologias">Tecnologias</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="container">
+        <p class="hero-etiqueta">Projeto de extensão</p>
+        <h1>SARA</h1>
+        <p class="hero-subtitulo">Sistema de Apoio e Registro de Acolhimento</p>
+        <p class="hero-texto">
+          Um lugar só para registrar quem são as pessoas acolhidas e o que foi
+          conversado em cada encontro com elas.
+        </p>
+        <div class="hero-acoes">
+          <a class="botao botao-claro" href="https://github.com/danbolotaro/sara-project">Ver no GitHub</a>
+          <a class="botao botao-contorno" href="https://github.com/danbolotaro/sara-project#como-executar">Como executar</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao" id="sobre">
+      <div class="container container-estreito">
+        <h2>Sobre o projeto</h2>
+        <p>
+          Quem acompanha pessoas em situação de vulnerabilidade costuma guardar
+          as informações em cadernos, mensagens e na memória. Com o tempo, o
+          histórico se perde: o que a pessoa contou, o que ela pediu, quando foi
+          a última visita e com quem da família é possível falar.
+        </p>
+        <p>
+          O SARA reúne isso em um sistema simples, pensado para o celular. Cada
+          pessoa tem um cadastro com sua história e seus contatos, e cada
+          encontro fica registrado com data, local, pedido de oração e
+          anotações. Assim, qualquer voluntário da equipe consegue retomar o
+          acompanhamento de onde o último parou.
+        </p>
+      </div>
+    </section>
+
+    <section class="secao secao-alternada" id="funcionalidades">
+      <div class="container">
+        <h2>Funcionalidades</h2>
+        <div class="cartoes">
+          <article class="cartao">
+            <h3>Pessoas</h3>
+            <p>
+              Cadastro com nome, gênero, idade, cidade de origem, história e
+              contatos de familiares e amigos. O perfil mostra o último encontro
+              em destaque e o histórico completo.
+            </p>
+          </article>
+          <article class="cartao">
+            <h3>Encontros</h3>
+            <p>
+              Registro de cada visita com data, local, pedido de oração,
+              anotações e contatos. Os encontros aparecem do mais recente para o
+              mais antigo e ficam ligados à pessoa.
+            </p>
+          </article>
+          <article class="cartao">
+            <h3>Acesso protegido</h3>
+            <p>
+              O sistema guarda informações sensíveis, por isso só abre com a
+              senha da equipe. Sem ela, nenhuma tela e nenhum dado ficam
+              acessíveis.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao" id="telas">
+      <div class="container">
+        <h2>Telas</h2>
+        <p class="secao-intro">Os dados exibidos nas imagens são fictícios.</p>
+        <div class="telas">
+          <figure class="tela">
+            <img src="assets/img/telas/login.png" alt="Tela de entrada do SARA com o campo de senha" width="390" height="720" loading="lazy">
+            <figcaption>Entrada com a senha da equipe</figcaption>
+          </figure>
+          <figure class="tela">
+            <img src="assets/img/telas/pessoa.png" alt="Perfil de uma pessoa com o último encontro em destaque e a lista de encontros" width="390" height="720" loading="lazy">
+            <figcaption>Perfil da pessoa e seus encontros</figcaption>
+          </figure>
+          <figure class="tela">
+            <img src="assets/img/telas/encontro.png" alt="Detalhes de um encontro com data, local, pedido de oração, informações e contatos" width="390" height="720" loading="lazy">
+            <figcaption>Detalhes de um encontro</figcaption>
+          </figure>
+          <figure class="tela">
+            <img src="assets/img/telas/formulario.png" alt="Formulário de cadastro de pessoa" width="390" height="720" loading="lazy">
+            <figcaption>Cadastro de pessoa</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="secao secao-alternada" id="tecnologias">
+      <div class="container container-estreito">
+        <h2>Tecnologias</h2>
+        <dl class="tecnologias">
+          <div>
+            <dt>Front-end e API</dt>
+            <dd>Next.js 16 (App Router), React 19 e TypeScript</dd>
+          </div>
+          <div>
+            <dt>Banco de dados</dt>
+            <dd>Supabase (PostgreSQL)</dd>
+          </div>
+          <div>
+            <dt>Notificações na tela</dt>
+            <dd>react-hot-toast</dd>
+          </div>
+          <div>
+            <dt>Testes</dt>
+            <dd>Playwright (end-to-end)</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="secao" id="links">
+      <div class="container container-estreito">
+        <h2>Saiba mais</h2>
+        <ul class="links">
+          <li>
+            <a href="https://github.com/danbolotaro/sara-project">Repositório no GitHub</a>
+            <span>Código-fonte completo.</span>
+          </li>
+          <li>
+            <a href="https://github.com/danbolotaro/sara-project#como-executar">Como executar</a>
+            <span>Passo a passo para rodar o projeto localmente.</span>
+          </li>
+          <li>
+            <a href="https://github.com/danbolotaro/sara-project/blob/master/docs/sistema.md">Documentação do sistema</a>
+            <span>Telas, API, autenticação e tabelas.</span>
+          </li>
+          <li>
+            <a href="https://github.com/danbolotaro/sara-project/blob/master/docs/diagramas.md">Diagramas</a>
+            <span>Caso de uso, DER e classes.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="rodape">
+    <div class="container">Projeto de extensão · SARA</div>
+  </footer>
+</body>
+</html>
