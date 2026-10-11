@@ -136,11 +136,6 @@ Os testes criam e apagam registros de verdade. Prefira um projeto do Supabase se
 - [O sistema](docs/sistema.md): telas, API, autenticação, tabelas e estrutura do código.
 - [Diagramas](docs/diagramas.md): caso de uso, DER e classes.
 
-## Problemas comuns
-
-- **Erro 500 ao entrar:** `APP_PASSWORD` ou `SESSION_SECRET` não estão no `.env.local`.
-- **"Não foi possível carregar" nas listas:** confira `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`. Projetos gratuitos do Supabase pausam depois de um tempo sem uso; reative pelo painel.
-
 ---
 
 Projeto de extensão · SARA
