@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { isAuthenticated, unauthorized } from '@/lib/session'
 
 export async function GET(request: NextRequest) {
+  if (!(await isAuthenticated())) return unauthorized()
+
   const { searchParams } = new URL(request.url)
   const personId = searchParams.get('person_id')
 
@@ -24,6 +27,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await isAuthenticated())) return unauthorized()
+
   const body = await request.json()
 
   if (!body.person_id || !body.date) {

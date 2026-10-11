@@ -1,48 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { Person } from "@/types";
+import { useResource } from "@/lib/useResource";
 import { PessoaCard } from "@/components/PessoaCard";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function PersonsPage() {
-  const [persons, setPersons] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { resource, reload } = useResource<Person[]>("/api/persons");
 
-  useEffect(() => {
-    fetch("/api/persons")
-      .then((res) => res.json())
-      .then((data) => setPersons(data))
-      .catch(() => {
-        setPersons([]);
-        toast.error("Erro ao carregar pessoas");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  if (resource.status === "loading") return <LoadingState />;
+  if (resource.status !== "ready") return <LoadErrorState onRetry={reload} />;
+
+  const persons = resource.data;
 
   return (
     <>
-      {loading && <div className="loading">Carregando...</div>}
+      <h1 className="page-title">Pessoas</h1>
 
-      {!loading && persons.length === 0 && (
-        <Link href="/persons/new" className="register-bar">
-          <span>Cadastrar nova pessoa</span>
-          <span className="register-bar-icon">+</span>
-        </Link>
+      {persons.length === 0 && (
+        <StateMessage
+          title="Nenhuma pessoa cadastrada"
+          description="Cadastre a primeira pessoa para começar."
+        />
       )}
 
-      {!loading && persons.length > 0 && (
-        <>
-          {persons.map((person) => (
-            <PessoaCard key={person.id} person={person} />
-          ))}
-          <Link href="/persons/new" className="register-bar">
-            <span>Cadastrar nova pessoa</span>
-            <span className="register-bar-icon">+</span>
-          </Link>
-        </>
-      )}
+      <div className="card-list">
+        {persons.map((person) => (
+          <PessoaCard key={person.id} person={person} />
+        ))}
+      </div>
+
+      <Link href="/persons/new" className="register-bar">
+        <span>Cadastrar nova pessoa</span>
+        <span className="register-bar-icon" aria-hidden="true">+</span>
+      </Link>
     </>
   );
 }

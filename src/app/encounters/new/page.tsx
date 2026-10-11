@@ -1,66 +1,53 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EncounterForm } from "@/components/EncounterForm";
-import { Person, EncounterCreate } from "@/types";
+import { Person, Encounter, EncounterCreate } from "@/types";
+import { apiFetch, errorMessage, jsonRequest } from "@/lib/api";
+import { useResource } from "@/lib/useResource";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function NewEncounterPage() {
   const router = useRouter();
-  const [persons, setPersons] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { resource, reload } = useResource<Person[]>("/api/persons");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/persons")
-      .then((r) => r.json())
-      .then((data) => {
-        const list = Array.isArray(data) ? data : [];
-        setPersons(list);
-        if (list.length === 0) {
-          toast.error("Cadastre uma pessoa primeiro");
-          router.push("/encounters");
-        }
-      })
-      .catch(() => {
-        setPersons([]);
-        toast.error("Erro ao carregar pessoas");
-        router.push("/encounters");
-      })
-      .finally(() => setLoading(false));
-  }, [router]);
 
   const handleSubmit = async (data: EncounterCreate) => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/encounters", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro ao cadastrar encontro");
-      }
-
-      const encounter = await res.json();
+      const encounter = await apiFetch<Encounter>(
+        "/api/encounters",
+        jsonRequest("POST", data)
+      );
       toast.success("Encontro cadastrado com sucesso");
       router.push(`/encounters/${encounter.id}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao cadastrar");
+    } catch (error) {
+      toast.error(errorMessage(error, "Erro ao cadastrar encontro"));
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return <div className="loading">Carregando...</div>;
-  if (persons.length === 0) return null;
+  if (resource.status === "loading") return <LoadingState />;
+  if (resource.status !== "ready") return <LoadErrorState onRetry={reload} />;
+
+  if (resource.data.length === 0) {
+    return (
+      <StateMessage
+        title="Nenhuma pessoa cadastrada"
+        description="Cadastre uma pessoa antes de registrar um encontro."
+        actionLabel="Cadastrar pessoa"
+        actionHref="/persons/new"
+      />
+    );
+  }
 
   return (
     <EncounterForm
-      persons={persons}
+      persons={resource.data}
       onSubmit={handleSubmit}
       isLoading={isSubmitting}
     />

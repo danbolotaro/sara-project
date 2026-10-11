@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Person, Encounter, EncounterCreate } from "@/types";
+import { toDateTimeLocalValue } from "@/lib/utils";
 
 interface EncounterFormProps {
   encounter?: Encounter;
@@ -11,6 +12,8 @@ interface EncounterFormProps {
   isLoading: boolean;
 }
 
+type FieldErrors = { personId?: string; date?: string };
+
 export function EncounterForm({
   encounter,
   persons,
@@ -18,9 +21,13 @@ export function EncounterForm({
   isLoading,
 }: EncounterFormProps) {
   const router = useRouter();
+  const personRef = useRef<HTMLSelectElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
   const [personId, setPersonId] = useState(encounter?.person_id || "");
-  const [date, setDate] = useState(
-    encounter?.date ? encounter.date.slice(0, 16) : ""
+  const [date, setDate] = useState(() =>
+    encounter?.date
+      ? encounter.date.slice(0, 16)
+      : toDateTimeLocalValue(new Date())
   );
   const [location, setLocation] = useState(encounter?.location || "");
   const [prayerRequest, setPrayerRequest] = useState(
@@ -28,17 +35,23 @@ export function EncounterForm({
   );
   const [notes, setNotes] = useState(encounter?.notes || "");
   const [contacts, setContacts] = useState(encounter?.contacts || "");
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const clearError = (field: keyof FieldErrors) => {
+    setErrors((current) => ({ ...current, [field]: undefined }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
+    const newErrors: FieldErrors = {};
 
     if (!personId) newErrors.personId = "Selecione uma pessoa";
     if (!date) newErrors.date = "Data é obrigatória";
 
-    if (Object.keys(newErrors).length > 0) {
+    if (newErrors.personId || newErrors.date) {
       setErrors(newErrors);
+      if (newErrors.personId) personRef.current?.focus();
+      else dateRef.current?.focus();
       return;
     }
 
@@ -55,14 +68,28 @@ export function EncounterForm({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="form" onSubmit={handleSubmit} noValidate>
+      <h1 className="page-title">{encounter ? "Editar encontro" : "Novo encontro"}</h1>
+      <p className="form-hint">
+        <span className="form-required" aria-hidden="true">*</span> Campos obrigatórios
+      </p>
+
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-person">Pessoa:</label>
+        <label className="form-label" htmlFor="encounter-person">
+          Pessoa <span className="form-required" aria-hidden="true">*</span>
+        </label>
         <select
+          ref={personRef}
           id="encounter-person"
           className="form-select"
           value={personId}
-          onChange={(e) => setPersonId(e.target.value)}
+          aria-required="true"
+          aria-invalid={Boolean(errors.personId)}
+          aria-describedby={errors.personId ? "encounter-person-error" : undefined}
+          onChange={(e) => {
+            setPersonId(e.target.value);
+            clearError("personId");
+          }}
         >
           <option value="">Selecione uma pessoa</option>
           {persons.map((p) => (
@@ -72,24 +99,39 @@ export function EncounterForm({
           ))}
         </select>
         {errors.personId && (
-          <span className="form-error">{errors.personId}</span>
+          <span id="encounter-person-error" className="form-error" role="alert">
+            {errors.personId}
+          </span>
         )}
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-date">Data:</label>
+        <label className="form-label" htmlFor="encounter-date">
+          Data <span className="form-required" aria-hidden="true">*</span>
+        </label>
         <input
+          ref={dateRef}
           id="encounter-date"
           type="datetime-local"
           className="form-input"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          aria-required="true"
+          aria-invalid={Boolean(errors.date)}
+          aria-describedby={errors.date ? "encounter-date-error" : undefined}
+          onChange={(e) => {
+            setDate(e.target.value);
+            clearError("date");
+          }}
         />
-        {errors.date && <span className="form-error">{errors.date}</span>}
+        {errors.date && (
+          <span id="encounter-date-error" className="form-error" role="alert">
+            {errors.date}
+          </span>
+        )}
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-location">Local:</label>
+        <label className="form-label" htmlFor="encounter-location">Local</label>
         <input
           id="encounter-location"
           type="text"
@@ -100,7 +142,7 @@ export function EncounterForm({
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-prayer">Pedido de Oração:</label>
+        <label className="form-label" htmlFor="encounter-prayer">Pedido de Oração</label>
         <textarea
           id="encounter-prayer"
           className="form-textarea"
@@ -110,7 +152,7 @@ export function EncounterForm({
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-notes">Informações:</label>
+        <label className="form-label" htmlFor="encounter-notes">Informações</label>
         <textarea
           id="encounter-notes"
           className="form-textarea"
@@ -120,7 +162,7 @@ export function EncounterForm({
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="encounter-contacts">Contatos:</label>
+        <label className="form-label" htmlFor="encounter-contacts">Contatos</label>
         <textarea
           id="encounter-contacts"
           className="form-textarea"
@@ -132,12 +174,12 @@ export function EncounterForm({
       <div className="form-actions">
         <button
           type="button"
-          className="btn-form-cancel"
+          className="btn btn-secondary"
           onClick={() => router.push("/encounters")}
         >
           Cancelar
         </button>
-        <button type="submit" className="btn-form-submit" disabled={isLoading}>
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? "Salvando..." : encounter ? "Salvar" : "Cadastrar"}
         </button>
       </div>

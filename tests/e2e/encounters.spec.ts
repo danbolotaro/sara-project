@@ -25,10 +25,10 @@ test.describe("Encontros", () => {
     await page.getByRole("link", { name: /Cadastrar novo encontro/ }).click();
     await expect(page).toHaveURL(/\/encounters\/new$/);
 
-    await page.getByLabel("Pessoa:").selectOption({ label: personName });
-    await page.getByLabel("Data:").fill("2026-09-12T14:30");
-    await page.getByLabel("Local:").fill(location);
-    await page.getByLabel("Pedido de Oração:").fill("Saúde da família");
+    await page.getByLabel("Pessoa").selectOption({ label: personName });
+    await page.getByLabel("Data").fill("2026-09-12T14:30");
+    await page.getByLabel("Local").fill(location);
+    await page.getByLabel("Pedido de Oração").fill("Saúde da família");
     await page.getByRole("button", { name: "Cadastrar" }).click();
 
     await expect(page.getByText("Encontro cadastrado com sucesso")).toBeVisible();
@@ -39,8 +39,6 @@ test.describe("Encontros", () => {
     await expect(page.getByText("12/09/26 - 14:30")).toBeVisible();
     await expect(page.getByText(location)).toBeVisible();
     await expect(page.getByText("Saúde da família")).toBeVisible();
-
-    // Encontro aparece no detalhe da pessoa
     await page.goto(`/persons/${personId}`);
     const highlight = page.locator(".highlight-card");
     await expect(highlight).toContainText("12/09/26 - 14:30");
@@ -48,11 +46,11 @@ test.describe("Encontros", () => {
   });
 
   test("não cadastra encontro sem pessoa e data", async ({ page, request }) => {
-    // Página redireciona se não houver nenhuma pessoa cadastrada
     const personId = await createPersonViaApi(request, { name: uniqueName("Carlos") });
     created.push({ type: "person", id: personId });
 
     await page.goto("/encounters/new");
+    await page.getByLabel("Data").fill("");
     await page.getByRole("button", { name: "Cadastrar" }).click();
 
     const errors = page.locator(".form-error");

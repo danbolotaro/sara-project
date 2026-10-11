@@ -1,106 +1,100 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { EncounterWithPerson } from "@/types";
 import { formatDate } from "@/lib/utils";
+import { apiFetch, errorMessage } from "@/lib/api";
+import { useResource } from "@/lib/useResource";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { InfoSection } from "@/components/InfoSection";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function EncounterDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [encounter, setEncounter] = useState<EncounterWithPerson | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { resource, reload } = useResource<EncounterWithPerson>(
+    `/api/encounters/${id}`
+  );
   const [showConfirm, setShowConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetch(`/api/encounters/${id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) {
-          setEncounter(null);
-          toast.error("Encontro não encontrado");
-        } else {
-          setEncounter(data);
-        }
-      })
-      .catch(() => {
-        setEncounter(null);
-        toast.error("Erro ao carregar dados");
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
-
   const handleDelete = async () => {
     setDeleting(true);
-    await fetch(`/api/encounters/${id}`, { method: "DELETE" });
-    toast.success("Encontro excluído com sucesso");
-    router.push("/encounters");
+
+    try {
+      await apiFetch(`/api/encounters/${id}`, { method: "DELETE" });
+      toast.success("Encontro excluído com sucesso");
+      router.push("/encounters");
+    } catch (error) {
+      toast.error(errorMessage(error, "Erro ao excluir encontro"));
+      setDeleting(false);
+    }
   };
 
-  if (loading) return <div className="loading">Carregando...</div>;
-  if (!encounter) return null;
+  if (resource.status === "loading") return <LoadingState />;
+
+  if (resource.status === "notFound") {
+    return (
+      <StateMessage
+        title="Encontro não encontrado"
+        description="Ele pode ter sido excluído."
+        actionLabel="Ver encontros"
+        actionHref="/encounters"
+      />
+    );
+  }
+
+  if (resource.status !== "ready") return <LoadErrorState onRetry={reload} />;
+
+  const encounter = resource.data;
 
   return (
     <div className="detail-page">
-      {/* Nome da pessoa clicável */}
-      <Link href={`/persons/${encounter.person_id}`} className="person-link" style={{ display: "block" }}>
+      <Link href={`/persons/${encounter.person_id}`} className="person-link">
         {encounter.person?.name}
       </Link>
 
-      {/* Ações */}
       <div className="detail-center-actions">
-        <Link href={`/encounters/${id}/edit`} className="btn-edit">
+        <Link href={`/encounters/${id}/edit`} className="btn btn-secondary btn-compact">
           Editar
         </Link>
-        <button className="btn-delete-small" onClick={() => setShowConfirm(true)}>
+        <button
+          type="button"
+          className="btn btn-danger-outline btn-compact"
+          onClick={() => setShowConfirm(true)}
+        >
           Excluir
         </button>
       </div>
 
-      {/* Card com data e local */}
       <div className="info-card">
         <div className="info-card-row">
-          <span className="info-card-label">Data:</span>
+          <span className="info-card-label">Data</span>
           <span className="info-card-value">{formatDate(encounter.date)}</span>
         </div>
         <div className="info-card-row">
-          <span className="info-card-label">Local:</span>
+          <span className="info-card-label">Local</span>
           <span className="info-card-value">{encounter.location || "—"}</span>
         </div>
       </div>
 
-      {/* Seção Pedido de Oração */}
-      <div className="info-section">
-        <span className="info-section-label">Pedido de Oração:</span>
-        <p className="info-section-value">{encounter.prayer_request || ""}</p>
-      </div>
+      <InfoSection label="Pedido de Oração" value={encounter.prayer_request} />
+      <InfoSection label="Informações" value={encounter.notes} />
+      <InfoSection label="Contatos" value={encounter.contacts} />
 
-      {/* Seção Informações */}
-      <div className="info-section">
-        <span className="info-section-label">Informações:</span>
-        <p className="info-section-value">{encounter.notes || ""}</p>
-      </div>
-
-      {showConfirm && (
-        <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
-          <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <p>Tem certeza que deseja excluir este encontro?</p>
-            <div className="confirm-actions">
-              <button className="btn-cancel" onClick={() => setShowConfirm(false)} disabled={deleting}>
-                Cancelar
-              </button>
-              <button className="btn-confirm-delete" onClick={handleDelete} disabled={deleting}>
-                {deleting ? "Excluindo..." : "Excluir"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showConfirm}
+        message="Tem certeza que deseja excluir este encontro?"
+        busy={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setShowConfirm(false)}
+      />
     </div>
   );
 }

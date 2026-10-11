@@ -6,25 +6,21 @@ interface PessoaCardProps {
 }
 
 export function PessoaCard({ person }: PessoaCardProps) {
+  const details = [person.gender, person.age ? `${person.age} anos` : null]
+    .filter(Boolean)
+    .join(" · ");
+
   return (
-    <div className="card">
+    <article className="card">
       <div className="card-info">
-        <span className="card-row">
-          <span className="card-label">Nome: </span>
-          {person.name}
-        </span>
-        <span className="card-row">
-          <span className="card-label">Gênero: </span>
-          {person.gender || "—"}
-        </span>
-        <span className="card-row">
-          <span className="card-label">Idade: </span>
-          {person.age ? `${person.age} anos` : "—"}
+        <span className="card-title">{person.name}</span>
+        <span className="card-meta">
+          {details || "Sem informações adicionais"}
         </span>
       </div>
-      <Link href={`/persons/${person.id}`} className="btn-details">
+      <Link href={`/persons/${person.id}`} className="btn btn-secondary btn-compact">
         Detalhes
       </Link>
-    </div>
+    </article>
   );
 }

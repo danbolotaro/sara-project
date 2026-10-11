@@ -1,12 +1,14 @@
 import { defineConfig, devices } from "@playwright/test";
 
+process.loadEnvFile(".env.local");
+
+export const STORAGE_STATE = "playwright/.auth/state.json";
+
 export default defineConfig({
   testDir: "./tests/e2e",
-  // Banco compartilhado (Supabase real): rodar em série evita interferência entre testes
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  // Primeira compilação de cada rota no `next dev` é lenta
   timeout: 60_000,
   expect: { timeout: 15_000 },
   reporter: [["list"], ["html", { open: "never" }]],
@@ -14,19 +16,23 @@ export default defineConfig({
     baseURL: "http://localhost:3000",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    // Para apresentação: `npm run test:e2e:demo` abre o navegador e desacelera cada ação
     headless: !process.env.SLOW,
     launchOptions: { slowMo: process.env.SLOW ? 600 : 0 },
   },
   projects: [
     {
+      name: "setup",
+      testMatch: /auth\.setup\.ts/,
+    },
+    {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: { ...devices["Desktop Chrome"], storageState: STORAGE_STATE },
+      dependencies: ["setup"],
     },
   ],
   webServer: {
     command: "npm run dev",
-    url: "http://localhost:3000/persons",
+    url: "http://localhost:3000/login",
     reuseExistingServer: true,
     timeout: 120_000,
   },

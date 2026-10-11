@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { PersonForm } from "@/components/PersonForm";
-import { PersonCreate } from "@/types";
+import { Person, PersonCreate } from "@/types";
+import { apiFetch, errorMessage, jsonRequest } from "@/lib/api";
 
 export default function NewPersonPage() {
   const router = useRouter();
@@ -14,22 +15,14 @@ export default function NewPersonPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/persons", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro ao cadastrar pessoa");
-      }
-
-      const person = await res.json();
+      const person = await apiFetch<Person>(
+        "/api/persons",
+        jsonRequest("POST", data)
+      );
       toast.success("Pessoa cadastrada com sucesso");
       router.push(`/persons/${person.id}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao cadastrar");
+    } catch (error) {
+      toast.error(errorMessage(error, "Erro ao cadastrar pessoa"));
       setIsLoading(false);
     }
   };

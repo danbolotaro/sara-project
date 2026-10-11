@@ -1,72 +1,71 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { EncounterForm } from "@/components/EncounterForm";
 import { Person, Encounter, EncounterCreate } from "@/types";
+import { apiFetch, errorMessage, jsonRequest } from "@/lib/api";
+import { useResource } from "@/lib/useResource";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function EditEncounterPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
 
-  const [encounter, setEncounter] = useState<Encounter | null>(null);
-  const [persons, setPersons] = useState<Person[]>([]);
-  const [loading, setLoading] = useState(true);
+  const encounter = useResource<Encounter>(`/api/encounters/${id}`);
+  const persons = useResource<Person[]>("/api/persons");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`/api/encounters/${id}`).then((r) => r.json()),
-      fetch("/api/persons").then((r) => r.json()),
-    ])
-      .then(([encounterData, personsData]) => {
-        if (encounterData.error) {
-          setEncounter(null);
-          toast.error("Encontro não encontrado");
-        } else {
-          setEncounter(encounterData);
-        }
-        setPersons(Array.isArray(personsData) ? personsData : []);
-      })
-      .catch(() => {
-        setEncounter(null);
-        toast.error("Erro ao carregar dados");
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+  const reloadAll = () => {
+    encounter.reload();
+    persons.reload();
+  };
 
   const handleSubmit = async (data: EncounterCreate) => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`/api/encounters/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro ao atualizar encontro");
-      }
-
+      await apiFetch(`/api/encounters/${id}`, jsonRequest("PUT", data));
       toast.success("Encontro atualizado com sucesso");
       router.push(`/encounters/${id}`);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro ao atualizar");
+    } catch (error) {
+      toast.error(errorMessage(error, "Erro ao atualizar encontro"));
       setIsSubmitting(false);
     }
   };
 
-  if (loading) return <div className="loading">Carregando...</div>;
-  if (!encounter) return null;
+  if (encounter.resource.status === "notFound") {
+    return (
+      <StateMessage
+        title="Encontro não encontrado"
+        description="Ele pode ter sido excluído."
+        actionLabel="Ver encontros"
+        actionHref="/encounters"
+      />
+    );
+  }
+
+  if (
+    encounter.resource.status === "loading" ||
+    persons.resource.status === "loading"
+  ) {
+    return <LoadingState />;
+  }
+
+  if (
+    encounter.resource.status !== "ready" ||
+    persons.resource.status !== "ready"
+  ) {
+    return <LoadErrorState onRetry={reloadAll} />;
+  }
 
   return (
     <EncounterForm
-      encounter={encounter}
-      persons={persons}
+      encounter={encounter.resource.data}
+      persons={persons.resource.data}
       onSubmit={handleSubmit}
       isLoading={isSubmitting}
     />

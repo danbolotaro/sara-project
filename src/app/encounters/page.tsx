@@ -1,48 +1,42 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { EncounterWithPerson } from "@/types";
+import { useResource } from "@/lib/useResource";
 import { EncontroCard } from "@/components/EncontroCard";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function EncountersPage() {
-  const [encounters, setEncounters] = useState<EncounterWithPerson[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { resource, reload } =
+    useResource<EncounterWithPerson[]>("/api/encounters");
 
-  useEffect(() => {
-    fetch("/api/encounters")
-      .then((res) => res.json())
-      .then((data) => setEncounters(data))
-      .catch(() => {
-        setEncounters([]);
-        toast.error("Erro ao carregar encontros");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  if (resource.status === "loading") return <LoadingState />;
+  if (resource.status !== "ready") return <LoadErrorState onRetry={reload} />;
+
+  const encounters = resource.data;
 
   return (
     <>
-      {loading && <div className="loading">Carregando...</div>}
+      <h1 className="page-title">Encontros</h1>
 
-      {!loading && encounters.length === 0 && (
-        <Link href="/encounters/new" className="register-bar">
-          <span>Cadastrar novo encontro</span>
-          <span className="register-bar-icon">+</span>
-        </Link>
+      {encounters.length === 0 && (
+        <StateMessage
+          title="Nenhum encontro cadastrado"
+          description="Registre o primeiro encontro para começar."
+        />
       )}
 
-      {!loading && encounters.length > 0 && (
-        <>
-          {encounters.map((encounter) => (
-            <EncontroCard key={encounter.id} encounter={encounter} />
-          ))}
-          <Link href="/encounters/new" className="register-bar">
-            <span>Cadastrar novo encontro</span>
-            <span className="register-bar-icon">+</span>
-          </Link>
-        </>
-      )}
+      <div className="card-list">
+        {encounters.map((encounter) => (
+          <EncontroCard key={encounter.id} encounter={encounter} />
+        ))}
+      </div>
+
+      <Link href="/encounters/new" className="register-bar">
+        <span>Cadastrar novo encontro</span>
+        <span className="register-bar-icon" aria-hidden="true">+</span>
+      </Link>
     </>
   );
 }

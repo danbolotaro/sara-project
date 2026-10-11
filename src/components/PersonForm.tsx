@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Person, PersonCreate } from "@/types";
 
@@ -14,6 +14,7 @@ const GENDER_OPTIONS = ["Masculino", "Feminino"];
 
 export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
   const router = useRouter();
+  const nameRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState(person?.name || "");
   const [gender, setGender] = useState(person?.gender || "");
   const [age, setAge] = useState(person?.age?.toString() || "");
@@ -24,12 +25,14 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (!name.trim()) {
       setError("Nome é obrigatório");
+      nameRef.current?.focus();
       return;
     }
+
+    setError("");
 
     await onSubmit({
       name: name.trim(),
@@ -42,21 +45,39 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="form" onSubmit={handleSubmit} noValidate>
+      <h1 className="page-title">{person ? "Editar pessoa" : "Nova pessoa"}</h1>
+      <p className="form-hint">
+        <span className="form-required" aria-hidden="true">*</span> Campo obrigatório
+      </p>
+
       <div className="form-group">
-        <label className="form-label" htmlFor="person-name">Nome:</label>
+        <label className="form-label" htmlFor="person-name">
+          Nome <span className="form-required" aria-hidden="true">*</span>
+        </label>
         <input
+          ref={nameRef}
           id="person-name"
           type="text"
           className="form-input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          aria-required="true"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? "person-name-error" : undefined}
+          onChange={(e) => {
+            setName(e.target.value);
+            setError("");
+          }}
         />
-        {error && <span className="form-error">{error}</span>}
+        {error && (
+          <span id="person-name-error" className="form-error" role="alert">
+            {error}
+          </span>
+        )}
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="person-gender">Gênero:</label>
+        <label className="form-label" htmlFor="person-gender">Gênero</label>
         <select
           id="person-gender"
           className="form-select"
@@ -71,10 +92,11 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="person-age">Idade:</label>
+        <label className="form-label" htmlFor="person-age">Idade</label>
         <input
           id="person-age"
           type="number"
+          inputMode="numeric"
           className="form-input"
           value={age}
           onChange={(e) => setAge(e.target.value)}
@@ -82,7 +104,7 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="person-hometown">Cidade Natal:</label>
+        <label className="form-label" htmlFor="person-hometown">Cidade Natal</label>
         <input
           id="person-hometown"
           type="text"
@@ -93,7 +115,7 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="person-story">História:</label>
+        <label className="form-label" htmlFor="person-story">História</label>
         <textarea
           id="person-story"
           className="form-textarea"
@@ -103,7 +125,7 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
       </div>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="person-contacts">Contatos de Família/Amigos:</label>
+        <label className="form-label" htmlFor="person-contacts">Contatos de Família/Amigos</label>
         <textarea
           id="person-contacts"
           className="form-textarea"
@@ -115,12 +137,12 @@ export function PersonForm({ person, onSubmit, isLoading }: PersonFormProps) {
       <div className="form-actions">
         <button
           type="button"
-          className="btn-form-cancel"
+          className="btn btn-secondary"
           onClick={() => router.push("/persons")}
         >
           Cancelar
         </button>
-        <button type="submit" className="btn-form-submit" disabled={isLoading}>
+        <button type="submit" className="btn btn-primary" disabled={isLoading}>
           {isLoading ? "Salvando..." : person ? "Salvar" : "Cadastrar"}
         </button>
       </div>

@@ -1,70 +1,85 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import toast from "react-hot-toast";
 import { Person, EncounterWithPerson } from "@/types";
 import { formatDate } from "@/lib/utils";
+import { useResource } from "@/lib/useResource";
+import { EncontroCard } from "@/components/EncontroCard";
+import { LoadingState } from "@/components/LoadingState";
+import { LoadErrorState, StateMessage } from "@/components/StateMessage";
 
 export default function PersonDetailPage() {
   const params = useParams();
   const id = params.id as string;
 
-  const [person, setPerson] = useState<Person | null>(null);
-  const [encounters, setEncounters] = useState<EncounterWithPerson[]>([]);
-  const [loading, setLoading] = useState(true);
+  const person = useResource<Person>(`/api/persons/${id}`);
+  const encounters = useResource<EncounterWithPerson[]>(
+    `/api/encounters?person_id=${id}`
+  );
 
-  useEffect(() => {
-    Promise.all([
-      fetch(`/api/persons/${id}`).then((r) => r.json()),
-      fetch(`/api/encounters?person_id=${id}`).then((r) => r.json()),
-    ])
-      .then(([personData, encountersData]) => {
-        if (personData.error) {
-          setPerson(null);
-          toast.error("Pessoa não encontrada");
-        } else {
-          setPerson(personData);
-          setEncounters(Array.isArray(encountersData) ? encountersData : []);
-        }
-      })
-      .catch(() => {
-        setPerson(null);
-        toast.error("Erro ao carregar dados");
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+  const reloadAll = () => {
+    person.reload();
+    encounters.reload();
+  };
 
-  if (loading) return <div className="loading">Carregando...</div>;
-  if (!person) return null;
+  if (person.resource.status === "notFound") {
+    return (
+      <StateMessage
+        title="Pessoa não encontrada"
+        description="Ela pode ter sido excluída."
+        actionLabel="Ver pessoas"
+        actionHref="/persons"
+      />
+    );
+  }
 
-  const lastEncounter = encounters.length > 0 ? encounters[0] : null;
+  if (
+    person.resource.status === "loading" ||
+    encounters.resource.status === "loading"
+  ) {
+    return <LoadingState />;
+  }
+
+  if (
+    person.resource.status !== "ready" ||
+    encounters.resource.status !== "ready"
+  ) {
+    return <LoadErrorState onRetry={reloadAll} />;
+  }
+
+  const personData = person.resource.data;
+  const encounterList = encounters.resource.data;
+  const lastEncounter = encounterList.length > 0 ? encounterList[0] : null;
 
   return (
     <div className="detail-page">
-      <h1 className="detail-name">{person.name}</h1>
+      <h1 className="detail-name">{personData.name}</h1>
 
       <div className="detail-header-row">
         <div className="detail-header-info">
-          <p className="detail-info">Idade: {person.age ? `${person.age} Anos` : "—"}</p>
-          <p className="detail-info">Gênero: {person.gender || "—"}</p>
+          <p className="detail-info">
+            <span className="detail-info-label">Idade:</span>{" "}
+            {personData.age ? `${personData.age} Anos` : "—"}
+          </p>
+          <p className="detail-info">
+            <span className="detail-info-label">Gênero:</span>{" "}
+            {personData.gender || "—"}
+          </p>
         </div>
-        <div className="detail-header-actions">
-          <Link href={`/persons/${id}/more`} className="btn-details">
-            Mais
-          </Link>
-        </div>
+        <Link href={`/persons/${id}/more`} className="btn btn-secondary btn-compact">
+          Mais
+        </Link>
       </div>
 
       {lastEncounter && (
         <div className="highlight-card">
           <div className="highlight-row">
-            <span className="highlight-label">Último encontro:</span>
+            <span className="highlight-label">Último encontro</span>
             <span className="highlight-value">{formatDate(lastEncounter.date)}</span>
           </div>
           <div className="highlight-row">
-            <span className="highlight-label">Local:</span>
+            <span className="highlight-label">Local</span>
             <span className="highlight-value">{lastEncounter.location || "—"}</span>
           </div>
         </div>
@@ -72,27 +87,15 @@ export default function PersonDetailPage() {
 
       <h2 className="section-title">Encontros</h2>
 
-      {encounters.length === 0 && (
-        <div className="empty-state">Nenhum encontro registrado</div>
+      {encounterList.length === 0 && (
+        <StateMessage title="Nenhum encontro registrado" />
       )}
 
-      {encounters.map((enc) => (
-        <div key={enc.id} className="card">
-          <div className="card-info">
-            <span className="card-row">
-              <span className="card-label">Data: </span>
-              {formatDate(enc.date)}
-            </span>
-            <span className="card-row">
-              <span className="card-label">Local: </span>
-              {enc.location || "—"}
-            </span>
-          </div>
-          <Link href={`/encounters/${enc.id}`} className="btn-details">
-            Detalhes
-          </Link>
-        </div>
-      ))}
+      <div className="card-list">
+        {encounterList.map((encounter) => (
+          <EncontroCard key={encounter.id} encounter={encounter} showPerson={false} />
+        ))}
+      </div>
     </div>
   );
 }

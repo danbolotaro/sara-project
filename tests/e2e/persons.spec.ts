@@ -15,10 +15,10 @@ test.describe("Pessoas", () => {
     await page.getByRole("link", { name: /Cadastrar nova pessoa/ }).click();
     await expect(page).toHaveURL(/\/persons\/new$/);
 
-    await page.getByLabel("Nome:").fill(name);
-    await page.getByLabel("Gênero:").selectOption("Feminino");
-    await page.getByLabel("Idade:").fill("30");
-    await page.getByLabel("Cidade Natal:").fill("Recife");
+    await page.getByLabel("Nome").fill(name);
+    await page.getByLabel("Gênero").selectOption("Feminino");
+    await page.getByLabel("Idade", { exact: true }).fill("30");
+    await page.getByLabel("Cidade Natal").fill("Recife");
     await page.getByRole("button", { name: "Cadastrar" }).click();
 
     await expect(page.getByText("Pessoa cadastrada com sucesso")).toBeVisible();
@@ -52,8 +52,8 @@ test.describe("Pessoas", () => {
     await page.getByRole("link", { name: "Editar" }).click();
     await expect(page).toHaveURL(new RegExp(`/persons/${id}/edit$`));
 
-    await page.getByLabel("Nome:").fill(newName);
-    await page.getByLabel("Idade:").fill("41");
+    await page.getByLabel("Nome").fill(newName);
+    await page.getByLabel("Idade", { exact: true }).fill("41");
     await page.getByRole("button", { name: "Salvar" }).click();
 
     await expect(page.getByText("Pessoa atualizada com sucesso")).toBeVisible();
@@ -69,15 +69,11 @@ test.describe("Pessoas", () => {
 
     await page.goto(`/persons/${id}/more`);
     const dialog = page.locator(".confirm-dialog");
-
-    // Cancelar mantém a pessoa
     await page.getByRole("button", { name: "Excluir" }).click();
     await expect(dialog).toBeVisible();
     await dialog.getByRole("button", { name: "Cancelar" }).click();
     await expect(dialog).toBeHidden();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(name);
-
-    // Confirmar exclui
     await page.getByRole("button", { name: "Excluir" }).click();
     await dialog.getByRole("button", { name: "Excluir" }).click();
 

@@ -7,3 +7,8 @@ export function formatDate(dateString: string): string {
   const minutes = String(date.getMinutes()).padStart(2, "0");
   return `${day}/${month}/${year} - ${hours}:${minutes}`;
 }
+
+export function toDateTimeLocalValue(date: Date): string {
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+}

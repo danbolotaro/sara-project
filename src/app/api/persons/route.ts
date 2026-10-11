@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
+import { isAuthenticated, unauthorized } from '@/lib/session'
 
 export async function GET() {
+  if (!(await isAuthenticated())) return unauthorized()
+
   const { data, error } = await supabase
     .from('person')
     .select('*')
@@ -17,6 +20,8 @@ export async function GET() {
 const VALID_GENDERS = ['Masculino', 'Feminino']
 
 export async function POST(request: NextRequest) {
+  if (!(await isAuthenticated())) return unauthorized()
+
   const body = await request.json()
 
   if (!body.name) {
